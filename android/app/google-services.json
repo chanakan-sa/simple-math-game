@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "746022793614",
+    "project_id": "miniproject-f2396",
+    "storage_bucket": "miniproject-f2396.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:746022793614:android:e2ee54426dc164782ef4df",
+        "android_client_info": {
+          "package_name": "com.example.math_game"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACcEAIr6KFOtTkdIoJiFnK_rz96bnC3Iw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,95 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'operator_selection_screen.dart';
+import 'package:firebase_core/firebase_core.dart'; // นำเข้า firebase_core
+// import 'package:math_game/RegisterScreen.dart';
+import 'package:math_game/sceen/dashboard.dart';
+import 'package:math_game/sceen/login.dart';
+import 'package:math_game/sceen/register.dart';
+import 'firebase_options.dart'; // ใช้การตั้งค่าจาก firebase_options.dart
+// import 'package:firebase_auth/firebase_auth.dart'; // ใช้ Firebase Authentication
+
+// หน้าแอปต่างๆ
+// import 'package:weektwo/screen/login.dart';
+// import 'package:weektwo/screen/dashboard.dart';
+// import 'package:weektwo/screen/register.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp();
-  runApp(SimpleMathGame());
+  WidgetsFlutterBinding.ensureInitialized(); // ให้แน่ใจว่า Firebase ถูก initialize ก่อน
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform, // ใช้การตั้งค่าจาก firebase_options.dart
+  );
+
+  runApp(MyApp()); // เรียกใช้แอปหลังจากที่ Firebase ถูก initialize
 }
 
-class SimpleMathGame extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Simple Math Game',
+      title: 'Firebase App',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.blue.shade50,
-        textTheme: TextTheme(
-          bodyLarge: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blueAccent),
-        ),
+        primaryColor: Colors.blue,
+        secondaryHeaderColor: Colors.blueAccent,
       ),
-      home: NameInputScreen(),
-    );
-  }
-}
-
-class NameInputScreen extends StatefulWidget {
-  @override
-  _NameInputScreenState createState() => _NameInputScreenState();
-}
-
-class _NameInputScreenState extends State<NameInputScreen> {
-  TextEditingController nameController = TextEditingController();
-
-  void goToOperatorSelection() {
-    if (nameController.text.isNotEmpty) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => OperatorSelectionScreen(playerName: nameController.text),
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Simple Math Game', style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: true,
-        backgroundColor: Colors.blueAccent,
-      ),
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-            elevation: 5,
-            child: Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('กรุณาตั้งชื่อ', style: Theme.of(context).textTheme.bodyLarge),
-                  SizedBox(height: 15),
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-                      hintText: 'Your Name',
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: goToOperatorSelection,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-                      padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                    ),
-                    child: Text('เล่น', style: TextStyle(fontSize: 20, color: Colors.white)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+      home: Dashboard(), // หน้าเริ่มต้นคือ LoginScreen
+      routes: {
+        'dashboard': (context) => Dashboard(), // หน้า Dashboard
+        'register': (context) => RegisterScreen(), // หน้า Register
+      },
     );
   }
 }
