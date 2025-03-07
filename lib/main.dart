@@ -1,39 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart'; // นำเข้า firebase_core
-// import 'package:math_game/RegisterScreen.dart';
-import 'package:math_game/sceen/dashboard.dart';
-import 'package:math_game/sceen/login.dart';
-import 'package:math_game/sceen/register.dart';
-import 'firebase_options.dart'; // ใช้การตั้งค่าจาก firebase_options.dart
-// import 'package:firebase_auth/firebase_auth.dart'; // ใช้ Firebase Authentication
-
-// หน้าแอปต่างๆ
-// import 'package:weektwo/screen/login.dart';
-// import 'package:weektwo/screen/dashboard.dart';
-// import 'package:weektwo/screen/register.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'screen/dashboard.dart';
+import 'screen/login.dart';
+import 'screen/register.dart';
+import 'screen/game_screen_new.dart';
+import 'screen/score_screen_new.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // ให้แน่ใจว่า Firebase ถูก initialize ก่อน
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform, // ใช้การตั้งค่าจาก firebase_options.dart
+    options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(MyApp()); // เรียกใช้แอปหลังจากที่ Firebase ถูก initialize
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Firebase App',
+      debugShowCheckedModeBanner: false,
+      title: 'Math_App',
       theme: ThemeData(
         primaryColor: Colors.blue,
         secondaryHeaderColor: Colors.blueAccent,
       ),
-      home: Dashboard(), // หน้าเริ่มต้นคือ LoginScreen
+      initialRoute: 'register',
       routes: {
-        'dashboard': (context) => Dashboard(), // หน้า Dashboard
-        'register': (context) => RegisterScreen(), // หน้า Register
+        'register': (context) => RegisterScreen(),
+        'login': (context) => LoginScreen(),
+        'dashboard': (context) => Dashboard(playerName: ''),
+        'gamescreen': (context) => GameScreen(
+              playerName: '', 
+              selectedOperator: '+',
+            ),
+        'scorescreen': (context) => ScoreScreen(
+              playerName: '', 
+              score: 0, 
+              stars: 0,
+            ),
       },
     );
   }

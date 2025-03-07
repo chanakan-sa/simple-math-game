@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'firebase_service.dart';
-import 'score_screen.dart';
+import 'score_screen_new.dart';
 
 class GameScreen extends StatefulWidget {
   final String playerName;
@@ -80,7 +80,7 @@ class _GameScreenState extends State<GameScreen> {
         score++;
         stars = score;
       });
-      FirebaseService.saveScore(widget.playerName, score, stars);
+      // FirebaseOptions.saveScore(widget.playerName, score, stars);
     }
 
     questionCount++;
