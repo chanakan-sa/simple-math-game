@@ -1,0 +1,2 @@
+C:/learnflutter/math_game/android/app/.cxx/RelWithDebInfo/j66675m5/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/learnflutter/math_game/android/app/.cxx/RelWithDebInfo/j66675m5/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 import 'dart:math';
-import 'score_screen_new.dart';
+import 'package:flutter/material.dart';
 
 class GameScreen extends StatefulWidget {
   final String playerName;
@@ -15,13 +13,14 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
+  int level = 1;
+  int questionCount = 0;
+  int score = 0;
+  int timeLeft = 30;
+  Timer? timer;
   int num1 = 0, num2 = 0, correctAnswer = 0;
   List<int> options = [];
-  int score = 0;
-  int stars = 0;
-  int questionCount = 0;
-  Timer? timer;
-  int totalTime = 20; // เปลี่ยนเป็นเวลารวมสำหรับ 10 ข้อ
+  bool isButtonPressed = false;
 
   @override
   void initState() {
@@ -32,8 +31,8 @@ class _GameScreenState extends State<GameScreen> {
 
   void startTimer() {
     timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (totalTime > 0) {
-        setState(() => totalTime--);
+      if (timeLeft > 0) {
+        setState(() => timeLeft--);
       } else {
         timer.cancel();
         showResultPopup();
@@ -43,20 +42,13 @@ class _GameScreenState extends State<GameScreen> {
 
   void generateQuestion() {
     Random random = Random();
-    num1 = random.nextInt(10) + 1;
-    num2 = random.nextInt(10) + 1;
-    String operator = widget.selectedOperator;
-    
-    switch (operator) {
+    num1 = random.nextInt(10 * level) + 1;
+    num2 = random.nextInt(10 * level) + 1;
+    switch (widget.selectedOperator) {
       case '+':
         correctAnswer = num1 + num2;
         break;
       case '-':
-        if (num1 < num2) {
-          int temp = num1;
-          num1 = num2;
-          num2 = temp;
-        }
         correctAnswer = num1 - num2;
         break;
       case '×':
@@ -68,24 +60,21 @@ class _GameScreenState extends State<GameScreen> {
         correctAnswer = num1 ~/ num2;
         break;
     }
-    
     options = [correctAnswer, correctAnswer + 1, correctAnswer - 1];
     options.shuffle();
     setState(() {});
   }
 
   void checkAnswer(int selectedAnswer) {
-    if (selectedAnswer == correctAnswer) {
-      setState(() {
-        score++;
-        stars = score;
-      });
-      // FirebaseOptions.saveScore(widget.playerName, score, stars);
-    }
+    setState(() => isButtonPressed = true);
+    Future.delayed(Duration(milliseconds: 200), () => setState(() => isButtonPressed = false));
 
+    if (selectedAnswer == correctAnswer) {
+      setState(() => score++);
+    }
     questionCount++;
 
-    if (questionCount >= 10 || totalTime <= 0) {
+    if (questionCount >= 10) {
       showResultPopup();
     } else {
       generateQuestion();
@@ -94,41 +83,37 @@ class _GameScreenState extends State<GameScreen> {
 
   void showResultPopup() {
     timer?.cancel();
-    String message = score >= 7 ? "สุดยอด! 🎉" : "ลองใหม่ได้นะ! 😊";
-
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text("หมดเวลา!! ผลลัพธ์ของคุณ", textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue)),
+        title: Text("เลเวล $level จบแล้ว!", textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(message, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
+            Text("คะแนนของคุณ: $score", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(stars, (index) => Icon(Icons.star, color: Colors.amber, size: 30)),
-            )
+            if (level < 5)
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    level++;
+                    questionCount = 0;
+                    score = 0;
+                    timeLeft = 30;
+                    generateQuestion();
+                    startTimer();
+                  });
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green, padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15)),
+                child: Text("ไปเลเวลถัดไป", style: TextStyle(fontSize: 18, color: Colors.white)),
+              )
+            else
+              Text("คุณเล่นครบทุกเลเวลแล้ว! 🎉", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.redAccent)),
           ],
         ),
-        actions: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ScoreScreen(playerName: widget.playerName, score: score, stars: stars),
-                ),
-              );
-            },
-            child: Text("ดูคะแนน", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-          )
-        ],
       ),
     );
   }
@@ -143,7 +128,7 @@ class _GameScreenState extends State<GameScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Math Challenge', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        title: Text('Math Challenge - เลเวล $level', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: Colors.blue,
         elevation: 5,
@@ -151,7 +136,7 @@ class _GameScreenState extends State<GameScreen> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue.shade50, Colors.blueAccent],
+            colors: [Colors.purple.shade100, Colors.blueAccent],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -161,34 +146,41 @@ class _GameScreenState extends State<GameScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('ผู้เล่น: ${widget.playerName}', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+              Text('ผู้เล่น: ${widget.playerName}', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
               SizedBox(height: 10),
-              Text('เวลาที่เหลือ: $totalTime วินาที', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.redAccent)),
+              
+              LinearProgressIndicator(
+                value: timeLeft / 30,
+                backgroundColor: Colors.white,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.redAccent),
+                minHeight: 10,
+              ),
               SizedBox(height: 20),
-              Container(
-                padding: EdgeInsets.all(25),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
-                ),
-                child: Column(
-                  children: [
-                    Text('$num1 ${widget.selectedOperator} $num2 = ?', style: TextStyle(fontSize: 45, fontWeight: FontWeight.bold, color: Colors.deepPurple)),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: options.map((option) => ElevatedButton(
-                        onPressed: () => checkAnswer(option),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                          padding: EdgeInsets.symmetric(horizontal: 25, vertical: 18),
-                        ),
-                        child: Text(option.toString(), style: TextStyle(fontSize: 24, color: Colors.white)),
-                      )).toList(),
-                    ),
-                  ],
+              
+              Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                elevation: 5,
+                child: Padding(
+                  padding: EdgeInsets.all(25),
+                  child: Column(
+                    children: [
+                      Text('$num1 ${widget.selectedOperator} $num2 = ?', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.deepPurple)),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: options.map((option) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: ElevatedButton(
+                              onPressed: () => checkAnswer(option),
+                              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15), elevation: 5),
+                              child: Text(option.toString(), style: TextStyle(fontSize: 22, color: Colors.white)),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

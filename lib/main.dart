@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'screen/name_input_screen.dart'; // ✅ Import
 import 'screen/dashboard.dart';
 import 'screen/login.dart';
 import 'screen/register.dart';
-import 'screen/game_screen_new.dart';
-import 'screen/score_screen_new.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,20 +25,12 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.blue,
         secondaryHeaderColor: Colors.blueAccent,
       ),
-      initialRoute: 'register',
+      initialRoute: 'register', // ✅ เริ่มที่หน้า Register
       routes: {
         'register': (context) => RegisterScreen(),
         'login': (context) => LoginScreen(),
+        'nameInput': (context) => NameInputScreen(),
         'dashboard': (context) => Dashboard(playerName: ''),
-        'gamescreen': (context) => GameScreen(
-              playerName: '', 
-              selectedOperator: '+',
-            ),
-        'scorescreen': (context) => ScoreScreen(
-              playerName: '', 
-              score: 0, 
-              stars: 0,
-            ),
       },
     );
   }

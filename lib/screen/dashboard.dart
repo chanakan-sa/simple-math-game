@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:math_game/screen/game_screen_new.dart';
-
+import 'game_screen_new.dart';
 
 class Dashboard extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -11,7 +10,7 @@ class Dashboard extends StatelessWidget {
 
   void logout(BuildContext context) async {
     await _auth.signOut();
-    Navigator.pushReplacementNamed(context, '/login');
+    Navigator.pushReplacementNamed(context, 'login');
   }
 
   void startGame(BuildContext context, String selectedOperator) {
@@ -27,51 +26,68 @@ class Dashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('เลือกประเภทการคำนวณ'),
-        centerTitle: true,
+        title: Center(child: Text("Simple Math Game")),
         backgroundColor: Colors.blueAccent,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.exit_to_app),
-            onPressed: () => logout(context),
-          ),
-        ],
       ),
-      body: Padding(
-        padding: EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('ผู้เล่น: $playerName', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
-            SizedBox(height: 20),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              mainAxisSpacing: 15,
-              crossAxisSpacing: 15,
-              children: [
-                _buildOperatorButton(context, '+', 'บวก'),
-                _buildOperatorButton(context, '-', 'ลบ'),
-                _buildOperatorButton(context, '×', 'คูณ'),
-                _buildOperatorButton(context, '÷', 'หาร'),
-              ],
-            ),
-          ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade100, Colors.blueAccent],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('ยินดีต้อนรับ, $playerName!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+              SizedBox(height: 20),
+              _buildGameModeCard(context, 'บวก', '+', Icons.add),
+              _buildGameModeCard(context, 'ลบ', '-', Icons.remove),
+              _buildGameModeCard(context, 'คูณ', '×', Icons.close),
+              _buildGameModeCard(context, 'หาร', '÷', Icons.horizontal_split),
+              SizedBox(height: 30),
+              ElevatedButton.icon(
+                onPressed: () => logout(context),
+                style: _logoutButtonStyle(),
+                icon: Icon(Icons.exit_to_app, color: Colors.white),
+                label: Text('ออกจากระบบ', style: TextStyle(fontSize: 18, color: Colors.white)),
+              ),
+            ],
+          ),
         ),
       ),
-      backgroundColor: Colors.blue.shade100,
     );
   }
 
-  Widget _buildOperatorButton(BuildContext context, String operator, String label) {
-    return ElevatedButton(
-      onPressed: () => startGame(context, operator),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blueAccent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-        padding: EdgeInsets.symmetric(vertical: 20),
+  Widget _buildGameModeCard(BuildContext context, String title, String operator, IconData icon) {
+    return GestureDetector(
+      onTap: () => startGame(context, operator),
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        elevation: 5,
+        child: Padding(
+          padding: EdgeInsets.all(15),
+          child: Row(
+            children: [
+              Icon(icon, size: 40, color: Colors.blueAccent),
+              SizedBox(width: 15),
+              Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
+            ],
+          ),
+        ),
       ),
-      child: Text(label, style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold)),
+    );
+  }
+
+  ButtonStyle _logoutButtonStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: Colors.redAccent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+      elevation: 5,
     );
   }
 }
